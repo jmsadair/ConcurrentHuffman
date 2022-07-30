@@ -117,8 +117,7 @@ set(MEMORYCHECK_COMMAND_OPTIONS "${MEMORYCHECK_COMMAND_OPTIONS} --error-exitcode
 # ------------------------------------------------------------------------------
 file(GLOB_RECURSE LIB_HEADER_FILES "include/*.h")
 file(GLOB_RECURSE LIB_SOURCE_FILES "src/*.cpp")
-add_library(concurrent_huffman_lib ${LIB_HEADER_FILES})
-add_executable(concurrent_huffman_lib ${LIB_SOURCE_FILES})
+add_library(concurrent_huffman_lib ${LIB_HEADER_FILES} ${LIB_SOURCE_FILES})
 set_target_properties(concurrent_huffman_lib PROPERTIES LINKER_LANGUAGE CXX)
 
 # ------------------------------------------------------------------------------
