@@ -1,5 +1,5 @@
-#ifndef CONCURRENTHUFFMAN_QUEUE_H
-#define CONCURRENTHUFFMAN_QUEUE_H
+#ifndef CONCURRENT_HUFFMAN_QUEUE_H
+#define CONCURRENT_HUFFMAN_QUEUE_H
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -65,4 +65,4 @@ private:
     std::condition_variable c;
 };
 } // namespace Concurrent
-#endif // CONCURRENTHUFFMAN_QUEUE_H
+#endif // CONCURRENT_HUFFMAN_QUEUE_H

@@ -123,9 +123,9 @@ set_target_properties(concurrent_huffman_lib PROPERTIES LINKER_LANGUAGE CXX)
 # ------------------------------------------------------------------------------
 # Concurrent Huffman Example
 # ------------------------------------------------------------------------------
-#add_executable(concurrent_huffman_example examples/example.cpp)
+#add_executable(concurrent_huffman_example example/main.cpp)
 #target_link_libraries(concurrent_huffman_example concurrent_huffman_lib)
-#install(TARGETS concurrent_huffman_example DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/examples)
+#install(TARGETS concurrent_huffman_example DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/example)
 
 # ------------------------------------------------------------------------------
 # Concurrent Huffman Benchmark

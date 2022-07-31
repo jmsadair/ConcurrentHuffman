@@ -1,5 +1,5 @@
-#ifndef CONCURRENTHUFFMAN_THREAD_POOL_H
-#define CONCURRENTHUFFMAN_THREAD_POOL_H
+#ifndef CONCURRENT_HUFFMAN_THREAD_POOL_H
+#define CONCURRENT_HUFFMAN_THREAD_POOL_H
 #include <atomic>
 #include <thread>
 #include <cassert>
@@ -71,4 +71,4 @@ private:
     }
 };
 } // namespace Concurrent
-#endif // CONCURRENTHUFFMAN_THREAD_POOL_H
+#endif // CONCURRENT_HUFFMAN_THREAD_POOL_H

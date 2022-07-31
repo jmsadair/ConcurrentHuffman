@@ -1,5 +1,5 @@
-#ifndef CONCURRENTHUFFMAN_TASK_H
-#define CONCURRENTHUFFMAN_TASK_H
+#ifndef CONCURRENT_HUFFMAN_TASK_H
+#define CONCURRENT_HUFFMAN_TASK_H
 #include <memory>
 namespace Concurrent {
 class Task
@@ -52,4 +52,4 @@ private:
     };
 };
 } // namespace Concurrent
-#endif // CONCURRENTHUFFMAN_TASK_H
+#endif // CONCURRENT_HUFFMAN_TASK_H

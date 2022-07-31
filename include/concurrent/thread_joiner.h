@@ -1,8 +1,8 @@
-#ifndef CONCURRENTHUFFMAN_THREAD_JOINER_H
-#define CONCURRENTHUFFMAN_THREAD_JOINER_H
-
+#ifndef CONCURRENT_HUFFMAN_THREAD_JOINER_H
+#define CONCURRENT_HUFFMAN_THREAD_JOINER_H
 #include <vector>
 #include <thread>
+
 namespace Concurrent {
 /**
  * A class to clean up threads used by the thread pool.
@@ -28,4 +28,4 @@ private:
     std::vector<std::thread> &threads;
 };
 } // namespace Concurrent
-#endif // CONCURRENTHUFFMAN_THREAD_JOINER_H
+#endif // CONCURRENT_HUFFMAN_THREAD_JOINER_H
