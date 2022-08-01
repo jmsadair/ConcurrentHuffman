@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <memory>
+#include <sstream>
 #include <fstream>
 #include "encoder.h"
 

@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <fstream>
-#include <filesystem>
+#include <sstream>
 #include "concurrent_huffman.h"
 
 // Tests encoding / decoding a file that only consists of a single, repeated character.
