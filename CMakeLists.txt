@@ -146,6 +146,5 @@ add_executable(concurrent_huffman_tests ${TEST_SOURCE_FILES})
 target_link_libraries(concurrent_huffman_tests concurrent_huffman_lib)
 target_link_libraries(concurrent_huffman_tests gtest_main)
 add_test(NAME concurrent_huffman_tests COMMAND concurrent_huffman_tests WORKING_DIRECTORY ${HUFFMAN_TEST_INPUT_PATH})
-gtest_discover_tests(concurrent_huffman_tests)
 install(TARGETS concurrent_huffman_tests DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/tests)
 
