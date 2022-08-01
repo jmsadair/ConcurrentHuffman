@@ -8,16 +8,14 @@
 class Decoder
 {
 public:
-    void decode(const std::string &file_to_decode_, const std::string &decoded_file_,
-        const std::unordered_map<char, std::string> &huffman_table, const std::vector<uint64_t> &block_offsets);
+    static void decode(const std::string &file_to_decode_, const std::string &decoded_file_,
+        const std::unordered_map<char, std::string> &encoding_table, const std::vector<uint64_t> &block_offsets);
 
 private:
-    void decodeFile(const std::unordered_map<std::string, char> &decoding_table, const std::vector<uint64_t> &block_offsets,
-        const std::string &file_text, const std::string &decoded_file);
+    static void decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<std::string, char> &decoding_table,
+        const std::vector<uint64_t> &block_offsets, const std::string &file_text, const std::string &decoded_file);
     static std::string decodeBlock(
         const std::unordered_map<std::string, char> &decoding_table, std::string::const_iterator start, std::string::const_iterator end);
-    static std::unordered_map<std::string, char> getDecodingTable(const std::unordered_map<char, std::string> &huffman_table);
-
-    Concurrent::ThreadPool thread_pool;
+    static std::unordered_map<std::string, char> getDecodingTable(const std::unordered_map<char, std::string> &encoding_table);
 };
 #endif // CONCURRENT_HUFFMAN_DECODER_H

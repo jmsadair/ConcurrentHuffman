@@ -1,29 +1,37 @@
 #include <algorithm>
 #include <memory>
+#include <fstream>
 #include "encoder.h"
 
-std::pair<std::unordered_map<char, std::string>, std::vector<uint64_t>> Encoder::encode(const std::string &file_to_encode, const std::string &encoded_file)
+std::pair<std::unordered_map<char, std::string>, std::vector<uint64_t>> Encoder::encode(
+    const std::string &file_to_encode, const std::string &encoded_file)
 {
+    // Start up the thread pool for encoding task submission.
+    Concurrent::ThreadPool thread_pool;
+
     // Read the file into memory.
     std::ifstream file(file_to_encode);
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string file_text = buffer.str();
 
-    std::unordered_map<char, uint64_t> character_frequencies = countCharacterFrequencies(file_text);
+    // Encode the file.
+    std::unordered_map<char, uint64_t> character_frequencies = countCharacterFrequencies(thread_pool, file_text);
     std::unique_ptr<Node> huffman_tree_root = constructHuffmanTree(character_frequencies);
     std::unordered_map<char, std::string> huffman_table = constructHuffmanTable(std::move(huffman_tree_root));
-    std::vector<uint64_t> block_offsets = encodeFile(huffman_table, file_text, encoded_file);
+    std::vector<uint64_t> block_offsets = encodeFile(thread_pool, huffman_table, file_text, encoded_file);
+
+    // Return the encoding table as well as the block offsets used for decoding.
     return std::make_pair(huffman_table, block_offsets);
 }
 
-std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(const std::string &file_text)
+std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent::ThreadPool &pool, const std::string &file_text)
 {
     // The hashmap that will hold the frequency of each character in the file.
     std::unordered_map<char, uint64_t> character_frequencies;
 
     // Blocks that will be submitted to thread pool for counting.
-    uint32_t block_size = 5;
+    uint32_t block_size = 500;
     uint32_t num_blocks = file_text.length() / block_size;
     auto block_start = file_text.begin();
 
@@ -35,7 +43,7 @@ std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(const std:
     {
         auto block_end = block_start;
         std::advance(block_end, block_size);
-        futures[i] = thread_pool.submitTask([=] { return countBlock(block_start, block_end); });
+        futures[i] = pool.submitTask([=] { return countBlock(block_start, block_end); });
         block_start = block_end;
     }
 
@@ -132,20 +140,17 @@ std::string Encoder::encodeBlock(
     return encoded;
 }
 
-std::vector<uint64_t> Encoder::encodeFile(
-    const std::unordered_map<char, std::string> &huffman_table, const std::string &file_text, const std::string &encoded_file)
+std::vector<uint64_t> Encoder::encodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<char, std::string> &huffman_table,
+    const std::string &file_text, const std::string &encoded_file)
 {
-    // The entirety of the text in the original file encoded.
+    // The entirety of the provided file encoded.
     std::string encoded_text;
-    // Used for decoding. The size of each block of encoded text that the worker threads should decode.
-    std::vector<uint64_t> block_offsets;
 
-    // Blocks that will be submitted to thread pool for encoding.
-    uint32_t block_size = 10;
+    // Get the blocks of the file that each thread will encode.
+    std::vector<uint64_t> block_offsets;
+    uint32_t block_size = 500;
     uint32_t num_blocks = file_text.length() / block_size;
     auto block_start = file_text.begin();
-
-    // A vector to hold the futures returned by the thread pool.
     std::vector<std::future<std::string>> futures(num_blocks);
 
     // Submit blocks to thread pool for encoding.
@@ -153,7 +158,7 @@ std::vector<uint64_t> Encoder::encodeFile(
     {
         auto block_end = block_start;
         std::advance(block_end, block_size);
-        futures[i] = thread_pool.submitTask(
+        futures[i] = pool.submitTask(
             [&table = std::as_const(huffman_table), start = block_start, end = block_end] { return encodeBlock(table, start, end); });
         block_start = block_end;
     }

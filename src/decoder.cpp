@@ -6,6 +6,9 @@
 void Decoder::decode(const std::string &file_to_decode_, const std::string &decoded_file_,
     const std::unordered_map<char, std::string> &huffman_table, const std::vector<uint64_t> &block_offsets)
 {
+    // Start up the thread pool for decoding task submission.
+    Concurrent::ThreadPool thread_pool;
+
     // Read the file into memory.
     std::ifstream file(file_to_decode_);
     std::stringstream buffer;
@@ -14,7 +17,9 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
 
     // Create a hashmap that maps codes to symbols.
     std::unordered_map<std::string, char> decoding_table = getDecodingTable(huffman_table);
-    decodeFile(decoding_table, block_offsets, file_text, decoded_file_);
+
+    // Decode the file.
+    decodeFile(thread_pool, decoding_table, block_offsets, file_text, decoded_file_);
 }
 
 std::string Decoder::decodeBlock(
@@ -44,8 +49,8 @@ std::unordered_map<std::string, char> Decoder::getDecodingTable(const std::unord
     return decoding_table;
 }
 
-void Decoder::decodeFile(const std::unordered_map<std::string, char> &decoding_table, const std::vector<uint64_t> &block_offsets,
-    const std::string &file_text, const std::string &decoded_file)
+void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<std::string, char> &decoding_table,
+    const std::vector<uint64_t> &block_offsets, const std::string &file_text, const std::string &decoded_file)
 {
     // The entirety of the encoded text, decoded.
     std::string decoded_text;
@@ -61,7 +66,7 @@ void Decoder::decodeFile(const std::unordered_map<std::string, char> &decoding_t
     {
         auto block_end = block_start;
         std::advance(block_end, block_offsets[i]);
-        futures[i] = thread_pool.submitTask(
+        futures[i] = pool.submitTask(
             [&table = std::as_const(decoding_table), start = block_start, end = block_end] { return decodeBlock(table, start, end); });
         block_start = block_end;
     }
