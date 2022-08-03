@@ -15,9 +15,8 @@ TEST(Huffman, EncodingAndDecodingTest1)
 
     std::string encoded_file = "test1_encoded.txt";
     std::string decoded_file = "test1_decoded.txt";
-    ConcurrentHuffman huffman;
-    huffman.encodeFile(file_to_encode, encoded_file);
-    huffman.decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);
@@ -44,9 +43,8 @@ TEST(Huffman, EncodingAndDecodingTest2)
 
     std::string encoded_file = "test2_encoded.txt";
     std::string decoded_file = "test2_decoded.txt";
-    ConcurrentHuffman huffman;
-    huffman.encodeFile(file_to_encode, encoded_file);
-    huffman.decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);
@@ -73,9 +71,8 @@ TEST(Huffman, EncodingAndDecodingTest3)
 
     std::string encoded_file = "test3_encoded.txt";
     std::string decoded_file = "test3_decoded.txt";
-    ConcurrentHuffman huffman;
-    huffman.encodeFile(file_to_encode, encoded_file);
-    huffman.decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);
@@ -102,9 +99,8 @@ TEST(Huffman, EncodingAndDecodingTest4)
 
     std::string encoded_file = "test4_encoded.txt";
     std::string decoded_file = "test4_decoded.txt";
-    ConcurrentHuffman huffman;
-    huffman.encodeFile(file_to_encode, encoded_file);
-    huffman.decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);

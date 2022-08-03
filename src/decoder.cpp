@@ -4,23 +4,51 @@
 #include <filesystem>
 #include "decoder.h"
 
-void Decoder::decode(const std::string &file_to_decode_, const std::string &decoded_file_,
-    const std::unordered_map<char, std::string> &huffman_table, const std::vector<uint64_t> &block_offsets)
+void Decoder::decode(const std::string &file_to_decode_, const std::string &decoded_file_)
 {
     // Start up the thread pool for decoding task submission.
     Concurrent::ThreadPool thread_pool;
 
-    // Read the file into memory.
-    std::ifstream file(file_to_decode_);
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string file_text = buffer.str();
+    // The block sizes and huffman table that will be read from the encoded file.
+    std::unordered_map<std::string, char> decoding_table;
+    std::vector<uint64_t> block_offsets;
 
-    // Create a hashmap that maps codes to symbols.
-    std::unordered_map<std::string, char> decoding_table = getDecodingTable(huffman_table);
+    std::ifstream file(file_to_decode_);
+    std::string text;
+
+    // Get the number of symbols from the first line of the file.
+    std::getline(file, text, '\n');
+    uint num_symbols  = std::stoi(text);
+
+    // Get the symbol and code from each line.
+    while (num_symbols-- != 0)
+    {
+        std::getline(file, text, '\n');
+        std::string code = text.substr(0, text.find(':'));
+        char symbol = static_cast<char>(std::stoi(text.substr(text.find(':') + 1, text.size())));
+        decoding_table.insert({code, symbol});
+    }
+
+    // Get the number of blocks from the current line.
+    std::getline(file, text);
+    uint32_t num_blocks = std::stoi(text);
+    block_offsets.reserve(num_blocks);
+
+    // Get each block size.
+    while (num_blocks-- != 0)
+    {
+        std::getline(file, text);
+        block_offsets.push_back(std::stoi(text));
+    }
+
+    // Read the rest of the file into memory.
+    std::stringstream  buffer;
+    buffer << file.rdbuf();
+    text = buffer.str();
+    file.close();
 
     // Decode the file.
-    decodeFile(thread_pool, decoding_table, block_offsets, file_text, decoded_file_);
+    decodeFile(thread_pool, decoding_table, block_offsets, text, decoded_file_);
 }
 
 std::string Decoder::decodeBlock(
@@ -40,14 +68,6 @@ std::string Decoder::decodeBlock(
         ++start;
     }
     return decoded_block;
-}
-
-std::unordered_map<std::string, char> Decoder::getDecodingTable(const std::unordered_map<char, std::string> &huffman_table)
-{
-    std::unordered_map<std::string, char> decoding_table;
-    for (const auto &[symbol, code] : huffman_table)
-        decoding_table[code] = symbol;
-    return decoding_table;
 }
 
 void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<std::string, char> &decoding_table,
@@ -79,7 +99,7 @@ void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<
     decoded_text += last_block;
 
     // Write the decoded string to the specified file.
-    std::ofstream file(decoded_file);
+    std::ofstream file(decoded_file, std::ios::binary);
     file << decoded_text;
     file.close();
 }

@@ -2,10 +2,11 @@
 #include <memory>
 #include <sstream>
 #include <fstream>
+#include <iostream>
+#include <bitset>
 #include "encoder.h"
 
-std::pair<std::unordered_map<char, std::string>, std::vector<uint64_t>> Encoder::encode(
-    const std::string &file_to_encode, const std::string &encoded_file)
+void Encoder::encode(const std::string &file_to_encode, const std::string &encoded_file)
 {
     // Start up the thread pool for encoding task submission.
     Concurrent::ThreadPool thread_pool;
@@ -15,15 +16,13 @@ std::pair<std::unordered_map<char, std::string>, std::vector<uint64_t>> Encoder:
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string file_text = buffer.str();
+    file.close();
 
     // Encode the file.
     std::unordered_map<char, uint64_t> character_frequencies = countCharacterFrequencies(thread_pool, file_text);
     std::unique_ptr<Node> huffman_tree_root = constructHuffmanTree(character_frequencies);
     std::unordered_map<char, std::string> huffman_table = constructHuffmanTable(std::move(huffman_tree_root));
-    std::vector<uint64_t> block_offsets = encodeFile(thread_pool, huffman_table, file_text, encoded_file);
-
-    // Return the encoding table as well as the block offsets used for decoding.
-    return std::make_pair(huffman_table, block_offsets);
+    encodeFile(thread_pool, huffman_table, file_text, encoded_file);
 }
 
 std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent::ThreadPool &pool, const std::string &file_text)
@@ -141,8 +140,7 @@ std::string Encoder::encodeBlock(
     return encoded;
 }
 
-std::vector<uint64_t> Encoder::encodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<char, std::string> &huffman_table,
-    const std::string &file_text, const std::string &encoded_file)
+void Encoder::encodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<char, std::string> &huffman_table, const std::string &file_text, const std::string &encoded_file)
 {
     // The entirety of the provided file encoded.
     std::string encoded_text;
@@ -174,10 +172,16 @@ std::vector<uint64_t> Encoder::encodeFile(Concurrent::ThreadPool &pool, const st
     }
     encoded_text += last_encoded_block;
 
-    // Write the encoded string to the specified file.
     std::ofstream file(encoded_file);
+    file << std::to_string(huffman_table.size()) << '\n';
+    // Write symbols and corresponding codes to file.
+    for (const auto& [symbol, code] : huffman_table)
+        file << code << ':' << static_cast<int>(symbol) << '\n';
+    file << std::to_string(block_offsets.size()) << '\n';
+    // Write block offsets to file.
+    for (const auto& offset : block_offsets)
+        file << std::to_string(offset) << '\n';
+    // Write the encoded text to the file.
     file << encoded_text;
     file.close();
-
-    return block_offsets;
 }
