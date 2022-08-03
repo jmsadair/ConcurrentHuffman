@@ -10,6 +10,7 @@ class Encoder
 {
 public:
     static void encode(const std::string &file_to_encode_, const std::string &encoded_file_);
+
 private:
     static std::unordered_map<char, std::string> constructHuffmanTable(std::unique_ptr<Node> huffman_tree_root);
     static std::unique_ptr<Node> constructHuffmanTree(const std::unordered_map<char, uint64_t> &character_frequencies);

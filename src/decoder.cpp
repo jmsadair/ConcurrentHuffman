@@ -18,7 +18,7 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
 
     // Get the number of symbols from the first line of the file.
     std::getline(file, text, '\n');
-    uint num_symbols  = std::stoi(text);
+    uint num_symbols = std::stoi(text);
 
     // Get the symbol and code from each line.
     while (num_symbols-- != 0)
@@ -42,7 +42,7 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
     }
 
     // Read the rest of the file into memory.
-    std::stringstream  buffer;
+    std::stringstream buffer;
     buffer << file.rdbuf();
     text = buffer.str();
     file.close();
