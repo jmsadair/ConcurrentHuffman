@@ -16,9 +16,12 @@ private:
     static std::unique_ptr<Node> constructHuffmanTree(const std::unordered_map<char, uint64_t> &character_frequencies);
     static std::unordered_map<char, uint64_t> countCharacterFrequencies(Concurrent::ThreadPool &pool, const std::string &file_text);
     static std::unordered_map<char, uint64_t> countBlock(std::string::const_iterator start, std::string::const_iterator end);
-    static void encodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<char, std::string> &huffman_table,
-        const std::string &file_text, const std::string &encoded_file);
-    static std::string encodeBlock(
+    static std::pair<std::string, std::vector<uint32_t>> toBitString(Concurrent::ThreadPool &pool,
+        const std::unordered_map<char, std::string> &huffman_table, const std::string &file_text, const std::string &encoded_file);
+    static std::string toBitString(
         const std::unordered_map<char, std::string> &huffman_table, std::string::const_iterator start, std::string::const_iterator end);
+    static uint8_t padBitString(std::string &bit_string);
+    static std::vector<unsigned char> toBytes(Concurrent::ThreadPool &pool, const std::string &bit_string);
+    static std::vector<unsigned char> toBytes(std::string::const_iterator start, std::string::const_iterator end);
 };
 #endif // CONCURRENT_HUFFMAN_ENCODER_H

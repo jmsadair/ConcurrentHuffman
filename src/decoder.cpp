@@ -2,6 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <filesystem>
+#include <bitset>
+#include <regex>
 #include "decoder.h"
 
 void Decoder::decode(const std::string &file_to_decode_, const std::string &decoded_file_)
@@ -9,46 +11,28 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
     // Start up the thread pool for decoding task submission.
     Concurrent::ThreadPool thread_pool;
 
-    // The block sizes and huffman table that will be read from the encoded file.
+    std::ifstream file(file_to_decode_, std::ios::binary);
+
+    // Get decoding table, block offsets, and padding from file header.
     std::unordered_map<std::string, char> decoding_table;
-    std::vector<uint64_t> block_offsets;
-
-    std::ifstream file(file_to_decode_);
-    std::string text;
-
-    // Get the number of symbols from the first line of the file.
-    std::getline(file, text, '\n');
-    uint num_symbols = std::stoi(text);
-
-    // Get the symbol and code from each line.
-    while (num_symbols-- != 0)
-    {
-        std::getline(file, text, '\n');
-        std::string code = text.substr(0, text.find(':'));
-        char symbol = static_cast<char>(std::stoi(text.substr(text.find(':') + 1, text.size())));
-        decoding_table.insert({code, symbol});
-    }
-
-    // Get the number of blocks from the current line.
-    std::getline(file, text);
-    uint32_t num_blocks = std::stoi(text);
-    block_offsets.reserve(num_blocks);
-
-    // Get each block size.
-    while (num_blocks-- != 0)
-    {
-        std::getline(file, text);
-        block_offsets.push_back(std::stoi(text));
-    }
+    std::vector<uint32_t> block_offsets;
+    uint8_t padding = 0;
+    readFileHeader(file, decoding_table, block_offsets, padding);
 
     // Read the rest of the file into memory.
     std::stringstream buffer;
     buffer << file.rdbuf();
-    text = buffer.str();
+    std::string text = buffer.str();
     file.close();
 
+    // Get the encoded text as a bit string and remove padding.
+    std::string bit_string = toBitString(thread_pool, text);
+    bit_string.erase(bit_string.length() - padding);
+    std::cout << text << std::endl;
+    std::cout << bit_string << std::endl;
+
     // Decode the file.
-    decodeFile(thread_pool, decoding_table, block_offsets, text, decoded_file_);
+    decodeFile(thread_pool, decoding_table, block_offsets, bit_string, decoded_file_);
 }
 
 std::string Decoder::decodeBlock(
@@ -71,7 +55,7 @@ std::string Decoder::decodeBlock(
 }
 
 void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<std::string, char> &decoding_table,
-    const std::vector<uint64_t> &block_offsets, const std::string &file_text, const std::string &decoded_file)
+    const std::vector<uint32_t> &block_offsets, const std::string &file_text, const std::string &decoded_file)
 {
     // The entirety of the encoded text, decoded.
     std::string decoded_text;
@@ -99,7 +83,82 @@ void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<
     decoded_text += last_block;
 
     // Write the decoded string to the specified file.
-    std::ofstream file(decoded_file, std::ios::binary);
+    std::ofstream file(decoded_file);
     file << decoded_text;
     file.close();
+}
+
+void Decoder::readFileHeader(std::ifstream &input_file, std::unordered_map<std::string, char> &decoding_table,
+    std::vector<uint32_t> &block_offsets, uint8_t &padding)
+{
+    std::string table_data;
+    std::string block_data;
+    std::string padding_data;
+    std::getline(input_file, table_data);
+    std::getline(input_file, block_data);
+    std::getline(input_file, padding_data);
+
+    char delimiter = ' ';
+    size_t delimiter_pos = 0;
+
+    while ((delimiter_pos = table_data.find(delimiter)) != std::string::npos) {
+        std::string token = table_data.substr(0,  delimiter_pos);
+        std::string code = token.substr(0, token.find(','));
+        char symbol = static_cast<char>(std::stoi(token.substr(token.find(',') + 1, token.size())));
+        decoding_table.insert({code, symbol});
+        table_data.erase(0, delimiter_pos + 1);
+    }
+
+    delimiter_pos = 0;
+    while ((delimiter_pos = block_data.find(delimiter)) != std::string::npos) {
+        std::string token = block_data.substr(0,  delimiter_pos);
+        uint32_t offset = std::stoi(token);
+        block_offsets.push_back(offset);
+        block_data.erase(0, delimiter_pos + 1);
+    }
+
+    padding = std::stoi(padding_data);
+}
+std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string &encoded_text)
+{
+    // The entirety of the file encoded as a bit string.
+    std::string bit_string;
+
+    uint32_t block_size = 500;
+    uint32_t num_blocks = encoded_text.length() / block_size;
+    auto block_start = encoded_text.begin();
+    std::vector<std::future<std::string>> futures(num_blocks);
+
+    // Submit blocks to thread pool for encoding.
+    for (uint32_t i = 0; i < num_blocks; ++i)
+    {
+        auto block_end = block_start;
+        std::advance(block_end, block_size);
+        futures[i] = pool.submitTask(
+            [start = block_start, end = block_end] { return toBitString(start, end); });
+        block_start = block_end;
+    }
+    std::string last_encoded_block = toBitString(block_start, encoded_text.end());
+
+    // Combine the text that each thread encoded into a single string.
+    for (uint32_t i = 0; i < num_blocks; ++i)
+    {
+        std::string encoded_block = futures[i].get();
+        bit_string += encoded_block;
+    }
+    bit_string += last_encoded_block;
+
+    return bit_string;
+}
+
+std::string Decoder::toBitString(std::string::const_iterator start, std::string::const_iterator end)
+{
+    std::string bit_string;
+    while (start != end)
+    {
+        std::bitset<8> bits(*start);
+        bit_string += bits.to_string();
+        ++start;
+    }
+    return bit_string;
 }
