@@ -3,7 +3,6 @@
 #include <sstream>
 #include <filesystem>
 #include <bitset>
-#include <regex>
 #include "decoder.h"
 
 void Decoder::decode(const std::string &file_to_decode_, const std::string &decoded_file_)
@@ -14,10 +13,7 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
     std::ifstream file(file_to_decode_, std::ios::binary);
 
     // Get decoding table, block offsets, and padding from file header.
-    std::unordered_map<std::string, char> decoding_table;
-    std::vector<uint32_t> block_offsets;
-    uint8_t padding = 0;
-    readFileHeader(file, decoding_table, block_offsets, padding);
+    HeaderData header_data = readFileHeader(file);
 
     // Read the rest of the file into memory.
     std::stringstream buffer;
@@ -27,12 +23,10 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
 
     // Get the encoded text as a bit string and remove padding.
     std::string bit_string = toBitString(thread_pool, text);
-    bit_string.erase(bit_string.length() - padding);
-    std::cout << text << std::endl;
-    std::cout << bit_string << std::endl;
+    bit_string.erase(bit_string.length() - header_data.padding);
 
     // Decode the file.
-    decodeFile(thread_pool, decoding_table, block_offsets, bit_string, decoded_file_);
+    decodeFile(thread_pool, header_data.decoding_table, header_data.block_offsets, bit_string, decoded_file_);
 }
 
 std::string Decoder::decodeBlock(
@@ -88,36 +82,35 @@ void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<
     file.close();
 }
 
-void Decoder::readFileHeader(std::ifstream &input_file, std::unordered_map<std::string, char> &decoding_table,
-    std::vector<uint32_t> &block_offsets, uint8_t &padding)
+HeaderData Decoder::readFileHeader(std::ifstream &input_file)
 {
-    std::string table_data;
-    std::string block_data;
-    std::string padding_data;
-    std::getline(input_file, table_data);
-    std::getline(input_file, block_data);
-    std::getline(input_file, padding_data);
+    std::unordered_map<std::string, char> decoding_table;
+    std::vector<uint32_t> block_offsets;
 
-    char delimiter = ' ';
+    std::string header;
+    std::vector<std::string> header_data;
+    std::getline(input_file, header);
+
+    char delimiter = ',';
     size_t delimiter_pos = 0;
+    while ((delimiter_pos = header.find(delimiter)) != std::string::npos)
+    {
+        header_data.push_back(header.substr(0, delimiter_pos));
+        header.erase(0, delimiter_pos + 1);
+    }
 
-    while ((delimiter_pos = table_data.find(delimiter)) != std::string::npos) {
-        std::string token = table_data.substr(0,  delimiter_pos);
-        std::string code = token.substr(0, token.find(','));
-        char symbol = static_cast<char>(std::stoi(token.substr(token.find(',') + 1, token.size())));
+    uint8_t num_symbols = std::stoi(header_data[0]);
+    uint8_t padding = std::stoi(header_data[2 * num_symbols + 1]);
+    for (int i = 1; i < 2 * num_symbols + 1; i += 2)
+    {
+        std::string code = header_data[i];
+        char symbol = static_cast<char>(std::stoi(header_data[i + 1]));
         decoding_table.insert({code, symbol});
-        table_data.erase(0, delimiter_pos + 1);
     }
+    for (int i = 2 * num_symbols + 2; i < header_data.size(); ++i)
+        block_offsets.push_back(std::stoi(header_data[i]));
 
-    delimiter_pos = 0;
-    while ((delimiter_pos = block_data.find(delimiter)) != std::string::npos) {
-        std::string token = block_data.substr(0,  delimiter_pos);
-        uint32_t offset = std::stoi(token);
-        block_offsets.push_back(offset);
-        block_data.erase(0, delimiter_pos + 1);
-    }
-
-    padding = std::stoi(padding_data);
+    return {decoding_table, block_offsets, padding};
 }
 std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string &encoded_text)
 {
@@ -134,8 +127,7 @@ std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string
     {
         auto block_end = block_start;
         std::advance(block_end, block_size);
-        futures[i] = pool.submitTask(
-            [start = block_start, end = block_end] { return toBitString(start, end); });
+        futures[i] = pool.submitTask([start = block_start, end = block_end] { return toBitString(start, end); });
         block_start = block_end;
     }
     std::string last_encoded_block = toBitString(block_start, encoded_text.end());

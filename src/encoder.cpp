@@ -31,13 +31,13 @@ void Encoder::encode(const std::string &file_to_encode, const std::string &encod
     std::ofstream output_file(encoded_file, std::ios::binary);
 
     // Write the table, offsets, and padding to the file.
-    for (const auto& [symbol, code] : huffman_table)
-        output_file << code << ',' << std::to_string(static_cast<int>(symbol)) << ' ';
+    output_file << std::to_string(huffman_table.size()) << ',';
+    for (const auto &[symbol, code] : huffman_table)
+        output_file << code << ',' << std::to_string(static_cast<int>(symbol)) << ',';
+    output_file << std::to_string(padding) << ',';
+    for (const auto &offset : block_offsets)
+        output_file << std::to_string(offset) << ',';
     output_file << '\n';
-    for (const auto& offset : block_offsets)
-        output_file << std::to_string(offset) << ' ';
-    output_file << '\n';
-    output_file << std::to_string(padding) << '\n';
 
     // Write the encoded text to the file.
     std::copy(bytes.begin(), bytes.end(), std::ostreambuf_iterator<char>(output_file));

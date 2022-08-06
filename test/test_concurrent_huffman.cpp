@@ -27,7 +27,7 @@ TEST(Huffman, EncodingAndDecodingTest1)
     ASSERT_EQ(expected_decoded_text, actual_decoded_text);
 
     // Clean up the files created during the tests.
-    std::remove("test1_encoded.txt");
+    //std::remove("test1_encoded.txt");
     std::remove("test1_decoded.txt");
 }
 
