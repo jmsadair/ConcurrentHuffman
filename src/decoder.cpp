@@ -69,8 +69,9 @@ std::string Decoder::decodeBitString(Concurrent::ThreadPool &pool, const HeaderD
     {
         auto block_end = block_start;
         std::advance(block_end, header_data.block_offsets[i]);
-        futures[i] = pool.submitTask(
-            [&table = std::as_const(header_data.decoding_table), start = block_start, end = block_end] { return decodeBitString(table, start, end); });
+        futures[i] = pool.submitTask([&table = std::as_const(header_data.decoding_table), start = block_start, end = block_end] {
+            return decodeBitString(table, start, end);
+        });
         block_start = block_end;
     }
     std::string last_block = decodeBitString(header_data.decoding_table, block_start, bit_string.end());
