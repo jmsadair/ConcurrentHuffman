@@ -10,26 +10,31 @@ void Decoder::decode(const std::string &file_to_decode_, const std::string &deco
     // Start up the thread pool for decoding task submission.
     Concurrent::ThreadPool thread_pool;
 
-    std::ifstream file(file_to_decode_, std::ios::binary);
+    std::ifstream input_file(file_to_decode_, std::ios::binary);
 
-    // Get decoding table, block offsets, and padding from file header.
-    HeaderData header_data = readFileHeader(file);
+    // Get decoding table, block offsets, and padding from input_file header.
+    HeaderData header_data = getHeaderData(input_file);
 
-    // Read the rest of the file into memory.
+    // Read the rest of the input_file into memory.
     std::stringstream buffer;
-    buffer << file.rdbuf();
+    buffer << input_file.rdbuf();
     std::string text = buffer.str();
-    file.close();
+    input_file.close();
 
     // Get the encoded text as a bit string and remove padding.
     std::string bit_string = toBitString(thread_pool, text);
     bit_string.erase(bit_string.length() - header_data.padding);
 
-    // Decode the file.
-    decodeFile(thread_pool, header_data.decoding_table, header_data.block_offsets, bit_string, decoded_file_);
+    // Decode the input_file.
+    std::string decoded_text = decodeBitString(thread_pool, header_data, bit_string);
+
+    // Write the decoded string to the specified input_file.
+    std::ofstream output_file(decoded_file_);
+    output_file << decoded_text;
+    output_file.close();
 }
 
-std::string Decoder::decodeBlock(
+std::string Decoder::decodeBitString(
     const std::unordered_map<std::string, char> &decoding_table, std::string::const_iterator start, std::string::const_iterator end)
 {
     std::string decoded_block;
@@ -48,15 +53,14 @@ std::string Decoder::decodeBlock(
     return decoded_block;
 }
 
-void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<std::string, char> &decoding_table,
-    const std::vector<uint32_t> &block_offsets, const std::string &file_text, const std::string &decoded_file)
+std::string Decoder::decodeBitString(Concurrent::ThreadPool &pool, const HeaderData &header_data, const std::string &bit_string)
 {
     // The entirety of the encoded text, decoded.
     std::string decoded_text;
 
     // Get the number of blocks to use.
-    uint32_t num_blocks = block_offsets.size();
-    auto block_start = file_text.begin();
+    uint32_t num_blocks = header_data.block_offsets.size();
+    auto block_start = bit_string.begin();
 
     std::vector<std::future<std::string>> futures(num_blocks);
 
@@ -64,25 +68,22 @@ void Decoder::decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<
     for (uint32_t i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
-        std::advance(block_end, block_offsets[i]);
+        std::advance(block_end, header_data.block_offsets[i]);
         futures[i] = pool.submitTask(
-            [&table = std::as_const(decoding_table), start = block_start, end = block_end] { return decodeBlock(table, start, end); });
+            [&table = std::as_const(header_data.decoding_table), start = block_start, end = block_end] { return decodeBitString(table, start, end); });
         block_start = block_end;
     }
-    std::string last_block = decodeBlock(decoding_table, block_start, file_text.end());
+    std::string last_block = decodeBitString(header_data.decoding_table, block_start, bit_string.end());
 
-    // Combine all the decoded blocks into a single string.
+    // Combine all the decoded text into a single string.
     for (uint32_t i = 0; i < num_blocks; ++i)
         decoded_text += futures[i].get();
     decoded_text += last_block;
 
-    // Write the decoded string to the specified file.
-    std::ofstream file(decoded_file);
-    file << decoded_text;
-    file.close();
+    return decoded_text;
 }
 
-HeaderData Decoder::readFileHeader(std::ifstream &input_file)
+HeaderData Decoder::getHeaderData(std::ifstream &input_file)
 {
     std::unordered_map<std::string, char> decoding_table;
     std::vector<uint32_t> block_offsets;
@@ -112,6 +113,7 @@ HeaderData Decoder::readFileHeader(std::ifstream &input_file)
 
     return {decoding_table, block_offsets, padding};
 }
+
 std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string &encoded_text)
 {
     // The entirety of the file encoded as a bit string.

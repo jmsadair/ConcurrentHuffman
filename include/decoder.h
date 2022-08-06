@@ -18,11 +18,10 @@ public:
     static void decode(const std::string &file_to_decode_, const std::string &decoded_file_);
 
 private:
-    static void decodeFile(Concurrent::ThreadPool &pool, const std::unordered_map<std::string, char> &decoding_table,
-        const std::vector<uint32_t> &block_offsets, const std::string &file_text, const std::string &decoded_file);
-    static std::string decodeBlock(
+    static std::string decodeBitString(Concurrent::ThreadPool &pool, const HeaderData &header_data, const std::string &bit_string);
+    static std::string decodeBitString(
         const std::unordered_map<std::string, char> &decoding_table, std::string::const_iterator start, std::string::const_iterator end);
-    static HeaderData readFileHeader(std::ifstream &input_file);
+    static HeaderData getHeaderData(std::ifstream &input_file);
     static std::string toBitString(Concurrent::ThreadPool &pool, const std::string &encoded_text);
     static std::string toBitString(std::string::const_iterator start, std::string::const_iterator end);
 };
