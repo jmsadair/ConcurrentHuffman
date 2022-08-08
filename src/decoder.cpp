@@ -89,27 +89,25 @@ HeaderData Decoder::getHeaderData(std::ifstream &input_file)
     std::vector<uint32_t> block_offsets;
 
     std::string header;
-    std::vector<std::string> header_data;
+
+    // Construct decoding table.
     std::getline(input_file, header);
+    std::stringstream table_stream(header);
+    std::string code;
+    std::string symbol;
+    while (table_stream >> code && table_stream >> symbol)
+        decoding_table.insert({code, static_cast<char>(std::stoi(symbol))});
 
-    char delimiter = ',';
-    size_t delimiter_pos = 0;
-    while ((delimiter_pos = header.find(delimiter)) != std::string::npos)
-    {
-        header_data.push_back(header.substr(0, delimiter_pos));
-        header.erase(0, delimiter_pos + 1);
-    }
+    // Get padding amount.
+    std::getline(input_file, header);
+    uint8_t padding = std::stoi(header);
 
-    uint8_t num_symbols = std::stoi(header_data[0]);
-    uint8_t padding = std::stoi(header_data[2 * num_symbols + 1]);
-    for (int i = 1; i < 2 * num_symbols + 1; i += 2)
-    {
-        std::string code = header_data[i];
-        char symbol = static_cast<char>(std::stoi(header_data[i + 1]));
-        decoding_table.insert({code, symbol});
-    }
-    for (int i = 2 * num_symbols + 2; i < header_data.size(); ++i)
-        block_offsets.push_back(std::stoi(header_data[i]));
+    // Get block offsets.
+    std::getline(input_file, header);
+    std::stringstream offset_stream(header);
+    std::string offset;
+    while (offset_stream >> offset)
+        block_offsets.push_back(std::stoi(offset));
 
     return {decoding_table, block_offsets, padding};
 }
@@ -124,7 +122,7 @@ std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string
     auto block_start = encoded_text.begin();
     std::vector<std::future<std::string>> futures(num_blocks);
 
-    // Submit blocks to thread pool for encoding.
+    // Submit blocks to thread pool for conversion to bit string.
     for (uint32_t i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
