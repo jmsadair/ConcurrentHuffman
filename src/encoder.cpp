@@ -15,7 +15,7 @@ void Encoder::encode(const std::string &file_to_encode, const std::string &encod
     std::ifstream input_file(file_to_encode);
     std::stringstream buffer;
     buffer << input_file.rdbuf();
-    std::string file_text = buffer.str();
+    const std::string file_text = buffer.str();
     input_file.close();
 
     // Build the Huffman tree and create the encoding table.
@@ -25,8 +25,8 @@ void Encoder::encode(const std::string &file_to_encode, const std::string &encod
 
     // Encode the text and get the bytes to write to the encoded file.
     auto [bit_string, block_offsets] = toBitString(thread_pool, huffman_table, file_text, encoded_file);
-    uint8_t padding = padBitString(bit_string);
-    std::vector<unsigned char> bytes = toBytes(thread_pool, bit_string);
+    const uint8_t padding = padBitString(bit_string);
+    const std::vector<unsigned char> bytes = toBytes(thread_pool, bit_string);
 
     std::ofstream output_file(encoded_file, std::ios::binary);
 
@@ -50,8 +50,8 @@ std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent
     std::unordered_map<char, uint64_t> character_frequencies;
 
     // Blocks that will be submitted to thread pool for counting.
-    uint32_t block_size = 500;
-    uint32_t num_blocks = file_text.length() / block_size;
+    const uint32_t block_size = 500;
+    const uint32_t num_blocks = file_text.length() / block_size;
     auto block_start = file_text.begin();
 
     // A vector to hold the futures returned by the thread pool.
@@ -62,12 +62,12 @@ std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent
     {
         auto block_end = block_start;
         std::advance(block_end, block_size);
-        futures[i] = pool.submitTask([=] { return countBlock(block_start, block_end); });
+        futures[i] = pool.submitTask([=] { return countCharacterFrequencies(block_start, block_end); });
         block_start = block_end;
     }
 
     // Count any remaining characters in the file string.
-    character_frequencies = std::move(countBlock(block_start, file_text.end()));
+    character_frequencies = std::move(countCharacterFrequencies(block_start, file_text.end()));
 
     // Sum up all the counts from the blocks.
     for (uint32_t i = 0; i < num_blocks; ++i)
@@ -80,7 +80,7 @@ std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent
     return character_frequencies;
 }
 
-std::unordered_map<char, uint64_t> Encoder::countBlock(std::string::const_iterator start, std::string::const_iterator end)
+std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(std::string::const_iterator start, std::string::const_iterator end)
 {
     std::unordered_map<char, uint64_t> character_counts;
     while (start != end)
@@ -93,7 +93,7 @@ std::unordered_map<char, uint64_t> Encoder::countBlock(std::string::const_iterat
 
 std::unique_ptr<Node> Encoder::constructHuffmanTree(const std::unordered_map<char, uint64_t> &character_frequencies)
 {
-    auto sort = [](const std::unique_ptr<Node> &left, const std::unique_ptr<Node> &right) -> bool {
+    const auto sort = [](const std::unique_ptr<Node> &left, const std::unique_ptr<Node> &right) -> bool {
         return left->frequency > right->frequency;
     };
 
@@ -173,8 +173,8 @@ std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(Concurrent::T
 
     // Get the blocks of the file that each thread will encode.
     std::vector<uint32_t> block_offsets;
-    uint32_t block_size = 500;
-    uint32_t num_blocks = file_text.length() / block_size;
+    const uint32_t block_size = 500;
+    const uint32_t num_blocks = file_text.length() / block_size;
     auto block_start = file_text.begin();
     std::vector<std::future<std::string>> futures(num_blocks);
 
@@ -187,12 +187,12 @@ std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(Concurrent::T
             [&table = std::as_const(huffman_table), start = block_start, end = block_end] { return toBitString(table, start, end); });
         block_start = block_end;
     }
-    std::string last_encoded_block = toBitString(huffman_table, block_start, file_text.end());
+    const std::string last_encoded_block = toBitString(huffman_table, block_start, file_text.end());
 
     // Combine the text that each thread encoded into a single string.
     for (uint32_t i = 0; i < num_blocks; ++i)
     {
-        std::string encoded_block = futures[i].get();
+        const std::string encoded_block = futures[i].get();
         block_offsets.push_back(encoded_block.length());
         bit_string += encoded_block;
     }
@@ -203,8 +203,8 @@ std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(Concurrent::T
 
 uint8_t Encoder::padBitString(std::string &bit_string)
 {
-    uint8_t padding = 8 * ((bit_string.length() / 8) + 1) - bit_string.length();
-    std::string padding_zeros(padding, '0');
+    const uint8_t padding = 8 * ((bit_string.length() / 8) + 1) - bit_string.length();
+    const std::string padding_zeros(padding, '0');
     bit_string += padding_zeros;
     return padding;
 }
@@ -215,8 +215,8 @@ std::vector<unsigned char> Encoder::toBytes(Concurrent::ThreadPool &pool, const 
     std::vector<unsigned char> bytes;
 
     // Get the blocks of the file that each thread will encode.
-    uint32_t block_size = 400;
-    uint32_t num_blocks = bit_string.length() / block_size;
+    const uint32_t block_size = 400;
+    const uint32_t num_blocks = bit_string.length() / block_size;
     auto block_start = bit_string.begin();
     std::vector<std::future<std::vector<unsigned char>>> futures(num_blocks);
 
@@ -247,9 +247,9 @@ std::vector<unsigned char> Encoder::toBytes(std::string::const_iterator start, s
     bytes.reserve(std::distance(start, end) / 8);
     while (start != end)
     {
-        std::string bit_string(start, start + 8);
-        std::bitset<8> bits{bit_string};
-        unsigned char byte = (bits.to_ulong() & 0xFF);
+        const std::string bit_string(start, start + 8);
+        const std::bitset<8> bits{bit_string};
+        const unsigned char byte = (bits.to_ulong() & 0xFF);
         bytes.push_back(byte);
         std::advance(start, 8);
     }
