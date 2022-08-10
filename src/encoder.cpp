@@ -18,7 +18,7 @@ void Encoder::compressFile(const std::string &file_to_compress, const std::strin
     {
         input_stream.open(file_to_compress, std::ios::binary);
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::ostringstream msg;
         msg << "Opening file '" << file_to_compress << "' failed, it either doesn't exist or is not accessible.";
@@ -173,8 +173,8 @@ std::string Encoder::toBitString(
     return bit_string;
 }
 
-std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(Concurrent::ThreadPool &pool,
-    const std::unordered_map<char, std::string> &encoding_table, const std::string &unencoded_text)
+std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(
+    Concurrent::ThreadPool &pool, const std::unordered_map<char, std::string> &encoding_table, const std::string &unencoded_text)
 {
     // The entirety of the file encoded as a bit string.
     std::string bit_string;

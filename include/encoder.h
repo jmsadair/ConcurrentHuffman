@@ -17,6 +17,7 @@ public:
      * @param compressed_file the name of the compressed file that will be created.
      */
     static void compressFile(const std::string &file_to_compress, const std::string &compressed_file);
+
 private:
     /**
      * Creates a hash table that maps symbols to their code (a bit string).
@@ -60,8 +61,8 @@ private:
      * @param unencoded_text the unencoded text that the bit string will be created from.
      * @return a string of ones and zeros that is the encoded text.
      */
-    static std::pair<std::string, std::vector<uint32_t>> toBitString(Concurrent::ThreadPool &pool,
-        const std::unordered_map<char, std::string> &encoding_table, const std::string &unencoded_text);
+    static std::pair<std::string, std::vector<uint32_t>> toBitString(
+        Concurrent::ThreadPool &pool, const std::unordered_map<char, std::string> &encoding_table, const std::string &unencoded_text);
 
     /**
      * Converts a string of unencoded text to a string of ones and zeros that is the encoded text.
@@ -71,7 +72,8 @@ private:
      * @param end an iterator to a string of unencoded text, characters will not be converted to their code from this position onwards.
      * @return a string of ones and zeros that is the encoded text.
      */
-    static std::string toBitString(const std::unordered_map<char, std::string> &encoding_table, std::string::const_iterator start, std::string::const_iterator end);
+    static std::string toBitString(
+        const std::unordered_map<char, std::string> &encoding_table, std::string::const_iterator start, std::string::const_iterator end);
 
     /**
      * Given a bit string, appends the minimum number of zeros to the string such that it has
