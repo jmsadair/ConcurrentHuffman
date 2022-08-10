@@ -3,10 +3,10 @@
 #include <sstream>
 #include "concurrent_huffman.h"
 
-// Tests encoding / decoding a file that only consists of a single, repeated character.
+// Tests encoding / decoding a file that only consists of a single, repeated, alphabetical character.
 TEST(Huffman, EncodingAndDecodingTest1)
 {
-    // Read the file to encode into memory.
+    // Read the file to compressFile into memory.
     std::string file_to_encode = "test1_input.txt";
     std::ifstream file1(file_to_encode);
     std::stringstream buffer1;
@@ -15,8 +15,8 @@ TEST(Huffman, EncodingAndDecodingTest1)
 
     std::string encoded_file = "test1_encoded.txt";
     std::string decoded_file = "test1_decoded.txt";
-    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
-    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::compressFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decompressFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);
@@ -31,10 +31,10 @@ TEST(Huffman, EncodingAndDecodingTest1)
     std::remove("test1_decoded.txt");
 }
 
-// Tests larger file to ensure that multiple threads encoding / decoding works.
+// Tests encoding / decoding a file with alphabetical, numeric, and special characters.
 TEST(Huffman, EncodingAndDecodingTest2)
 {
-    // Read the file to encode into memory.
+    // Read the file to compressFile into memory.
     std::string file_to_encode = "test2_input.txt";
     std::ifstream file1(file_to_encode);
     std::stringstream buffer1;
@@ -43,8 +43,8 @@ TEST(Huffman, EncodingAndDecodingTest2)
 
     std::string encoded_file = "test2_encoded.txt";
     std::string decoded_file = "test2_decoded.txt";
-    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
-    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::compressFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decompressFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);
@@ -62,7 +62,7 @@ TEST(Huffman, EncodingAndDecodingTest2)
 // Tests encoding / decoding a file that consists of various ASCII characters.
 TEST(Huffman, EncodingAndDecodingTest3)
 {
-    // Read the file to encode into memory.
+    // Read the file to compressFile into memory.
     std::string file_to_encode = "test3_input.txt";
     std::ifstream file1(file_to_encode);
     std::stringstream buffer1;
@@ -71,8 +71,8 @@ TEST(Huffman, EncodingAndDecodingTest3)
 
     std::string encoded_file = "test3_encoded.txt";
     std::string decoded_file = "test3_decoded.txt";
-    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
-    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::compressFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decompressFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);
@@ -87,10 +87,10 @@ TEST(Huffman, EncodingAndDecodingTest3)
     std::remove("test3_decoded.txt");
 }
 
-// Tests encoding / decoding a file that consists of various ASCII characters.
+// Tests encoding / decoding a larger file that will require multiple threads.
 TEST(Huffman, EncodingAndDecodingTest4)
 {
-    // Read the file to encode into memory.
+    // Read the file to compressFile into memory.
     std::string file_to_encode = "test4_input.txt";
     std::ifstream file1(file_to_encode);
     std::stringstream buffer1;
@@ -99,8 +99,8 @@ TEST(Huffman, EncodingAndDecodingTest4)
 
     std::string encoded_file = "test4_encoded.txt";
     std::string decoded_file = "test4_decoded.txt";
-    ConcurrentHuffman::encodeFile(file_to_encode, encoded_file);
-    ConcurrentHuffman::decodeFile(encoded_file, decoded_file);
+    ConcurrentHuffman::compressFile(file_to_encode, encoded_file);
+    ConcurrentHuffman::decompressFile(encoded_file, decoded_file);
 
     // Read the decoded file into memory.
     std::ifstream file2(decoded_file);

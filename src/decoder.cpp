@@ -5,31 +5,43 @@
 #include <bitset>
 #include "decoder.h"
 
-void Decoder::decode(const std::string &file_to_decode_, const std::string &decoded_file_)
+void Decoder::decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file)
 {
     // Start up the thread pool for decoding task submission.
     Concurrent::ThreadPool thread_pool;
 
-    std::ifstream input_file(file_to_decode_, std::ios::binary);
+    // Try to open the encoded file.
+    std::ifstream input_stream;
+    input_stream.exceptions(std::ifstream::failbit);
+    try
+    {
+        input_stream.open(file_to_decompress, std::ios::binary);
+    }
+    catch (const std::exception& e)
+    {
+        std::ostringstream msg;
+        msg << "Opening file '" << decompressed_file << "' failed, it either doesn't exist or is not accessible.";
+        throw std::runtime_error(msg.str());
+    }
 
-    // Get decoding table, block offsets, and padding from input_file header.
-    const HeaderData header_data = getHeaderData(input_file);
+    // Get decoding table, block offsets, and padding from input_stream header.
+    const HeaderData header_data = getHeaderData(input_stream);
 
-    // Read the rest of the input_file into memory.
+    // Read the rest of the input_stream into memory.
     std::stringstream buffer;
-    buffer << input_file.rdbuf();
+    buffer << input_stream.rdbuf();
     const std::string text = buffer.str();
-    input_file.close();
+    input_stream.close();
 
-    // Get the encoded text as a bit string and remove padding.
+    // Get the encoded text as a bit string and remove any padding zeros.
     std::string bit_string = toBitString(thread_pool, text);
     bit_string.erase(bit_string.length() - header_data.padding);
 
-    // Decode the input_file.
+    // Decode the encoded text from the file.
     const std::string decoded_text = decodeBitString(thread_pool, header_data, bit_string);
 
-    // Write the decoded string to the specified input_file.
-    std::ofstream output_file(decoded_file_);
+    // Write the decoded string to the specified input_stream.
+    std::ofstream output_file(decompressed_file);
     output_file << decoded_text;
     output_file.close();
 }
@@ -74,7 +86,8 @@ std::string Decoder::decodeBitString(Concurrent::ThreadPool &pool, const HeaderD
         });
         block_start = block_end;
     }
-    const std::string last_block = decodeBitString(header_data.decoding_table, block_start, bit_string.end());
+    auto block_end = bit_string.end();
+    const std::string last_block = decodeBitString(header_data.decoding_table, block_start, block_end);
 
     // Combine all the decoded text into a single string.
     for (uint32_t i = 0; i < num_blocks; ++i)
@@ -131,12 +144,13 @@ std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string
         futures[i] = pool.submitTask([start = block_start, end = block_end] { return toBitString(start, end); });
         block_start = block_end;
     }
-    const std::string last_encoded_block = toBitString(block_start, encoded_text.end());
+    const auto block_end = encoded_text.end();
+    const std::string last_encoded_block = toBitString(block_start, block_end);
 
     // Combine the text that each thread encoded into a single string.
     for (uint32_t i = 0; i < num_blocks; ++i)
     {
-        std::string encoded_block = futures[i].get();
+        const std::string encoded_block = futures[i].get();
         bit_string += encoded_block;
     }
     bit_string += last_encoded_block;

@@ -2,11 +2,12 @@
 #include "encoder.h"
 #include "decoder.h"
 
-void ConcurrentHuffman::encodeFile(const std::string &file_to_encode, const std::string &encoded_file)
+void ConcurrentHuffman::compressFile(const std::string &file_to_compress, const std::string &compressed_file)
 {
-    Encoder::encode(file_to_encode, encoded_file);
+    Encoder::compressFile(file_to_compress, compressed_file);
 }
-void ConcurrentHuffman::decodeFile(const std::string &file_to_decode, const std::string &decoded_file)
+
+void ConcurrentHuffman::decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file)
 {
-    Decoder::decode(file_to_decode, decoded_file);
+    Decoder::decompressFile(file_to_decompress, decompressed_file);
 }
