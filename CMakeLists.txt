@@ -20,6 +20,7 @@ set(HUFFMAN_INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR})
 # ------------------------------------------------------------------------------
 include_directories(include/concurrent)
 include_directories(include)
+
 # ------------------------------------------------------------------------------
 # Google Test
 # ------------------------------------------------------------------------------
@@ -148,6 +149,7 @@ file(COPY test/test_inputs/test1_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin
 file(COPY test/test_inputs/test2_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 file(COPY test/test_inputs/test3_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 file(COPY test/test_inputs/test4_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+file(COPY test/test_inputs/test5_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 add_executable(concurrent_huffman_tests ${TEST_SOURCE_FILES})
 target_link_libraries(concurrent_huffman_tests concurrent_huffman_lib)
 target_link_libraries(concurrent_huffman_tests gtest_main)
