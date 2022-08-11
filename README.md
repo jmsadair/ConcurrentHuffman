@@ -1,6 +1,7 @@
 ![workflow](https://github.com/jmsadair/ConcurrentHuffman/actions/workflows/linux.yml/badge.svg)
 ![workflow](https://github.com/jmsadair/ConcurrentHuffman/actions/workflows/macos.yml/badge.svg)
 [![codecov](https://codecov.io/gh/jmsadair/ConcurrentHuffman/branch/main/graph/badge.svg?token=40DYWKQQZ0)](https://codecov.io/gh/jmsadair/ConcurrentHuffman)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4670e66886e54d319f505b6422e4cfcb)](https://www.codacy.com/gh/jmsadair/ConcurrentHuffman/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jmsadair/ConcurrentHuffman&amp;utm_campaign=Badge_Grade)
 # ConcurrentHuffman
 This is a parallelized implementation of the [Huffman coding algorithm](https://en.wikipedia.org/wiki/Huffman_coding) that can be used for ultra fast file compression and decompression. 
 ## Building
