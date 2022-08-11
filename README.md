@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/jmsadair/ConcurrentHuffman/branch/main/graph/badge.svg?token=40DYWKQQZ0)](https://codecov.io/gh/jmsadair/ConcurrentHuffman)
 # ConcurrentHuffman
 This is a parallelized implementation of the [Huffman coding algorithm](https://en.wikipedia.org/wiki/Huffman_coding) that can be used for ultra fast file compression and decompression. 
-# Building
+## Building
 To build and test the project, run the following commands: 
 ```
   mkdir build && cd build
@@ -14,7 +14,7 @@ To build and test the project, run the following commands:
 
   make test
 ```
-# Usage
+## Usage
 Using this file compression tool is simple. To compress a file, provide the name of the file you would like to compress and a name for the compressed file that will be created.
 ```cpp
   #include "concurrent_huffman.h"
@@ -47,7 +47,7 @@ that will be created.
 
 ```
 Note that, in order to decompress a file, the compressed file must have been compressed with this tool.
-# Benchmarks
+## Benchmarks
 The compression process was benchmarked using a 1 MB file consisting of various numeric characters. The decompression process was benchmarked using a 470 kB file (the compressed 1 MB file). All benchmarks were ran on an Intel Core i7-8700 processor, which supports up to 12 threads.
 ```
   -----------------------------------------------------------
