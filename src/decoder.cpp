@@ -17,7 +17,7 @@ void Decoder::decompressFile(const std::string &file_to_decompress, const std::s
     {
         input_stream.open(file_to_decompress, std::ios::binary);
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
         std::ostringstream msg;
         msg << "Opening file '" << decompressed_file << "' failed, it either doesn't exist or is not accessible.";
