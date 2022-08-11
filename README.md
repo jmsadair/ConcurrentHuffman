@@ -47,4 +47,12 @@ that will be created.
 
 ```
 Note that, in order to decompress a file, the compressed file must have been compressed with this tool.
-
+# Benchmarks
+The compression process was benchmarked using a 1 MB file consisting of various numeric characters. The decompression process was benchmarked using a 470 kB file (the compressed 1 MB file). All benchmarks were ran on an Intel Core i7-8700 processor, which supports up to 12 threads.
+```
+  -----------------------------------------------------------
+  Benchmark                 Time             CPU   Iterations
+  -----------------------------------------------------------
+  BM_Compression         16.9 ms         15.9 ms           44
+  BM_Decompression       17.9 ms         6.60 ms          106
+```
