@@ -37,10 +37,10 @@ that will be created.
   
   int main()
   {
-    // The file that is going to be compressed.
+    // The file that is going to be decompressed.
     std::string file_to_decompress = "my_compressed_file.txt";
     // The decompressed file created from the compressed file.
-    std::string compressed_file = "my_decompressed_file.txt";
+    std::string decompressed_file = "my_decompressed_file.txt";
     // Decompress the file.
     ConcurrentHuffman::decompressFile(file_to_decompress, decompressed_file);
   }
