@@ -131,9 +131,11 @@ set_target_properties(concurrent_huffman_lib PROPERTIES LINKER_LANGUAGE CXX)
 # ------------------------------------------------------------------------------
 # Concurrent Huffman Benchmark
 # ------------------------------------------------------------------------------
-#add_executable(concurrent_huffman_benchmark benchmark/bench_huffman.cpp)
-#target_link_libraries(concurrent_huffman_benchmark benchmark::benchmark concurrent_huffman)
-#install(TARGETS concurrent_huffman_benchmark DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/benchmarks)
+add_executable(concurrent_huffman_benchmark benchmark/bench_huffman.cpp)
+target_link_libraries(concurrent_huffman_benchmark benchmark::benchmark concurrent_huffman_lib)
+install(TARGETS concurrent_huffman_benchmark DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/benchmarks)
+file(COPY benchmark/bench_compressed.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+file(COPY benchmark/bench_uncompressed.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 
 # ------------------------------------------------------------------------------
 # Concurrent Huffman Tests
@@ -141,10 +143,13 @@ set_target_properties(concurrent_huffman_lib PROPERTIES LINKER_LANGUAGE CXX)
 include(CTest)
 include(GoogleTest)
 file(GLOB_RECURSE TEST_SOURCE_FILES "test/*.cpp")
-
 add_executable(concurrent_huffman_tests ${TEST_SOURCE_FILES})
 target_link_libraries(concurrent_huffman_tests concurrent_huffman_lib)
 target_link_libraries(concurrent_huffman_tests gtest_main)
-add_test(NAME concurrent_huffman_tests COMMAND concurrent_huffman_tests WORKING_DIRECTORY ${HUFFMAN_TEST_INPUT_PATH})
+add_test(NAME concurrent_huffman_tests COMMAND concurrent_huffman_tests)
 install(TARGETS concurrent_huffman_tests DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/tests)
+file(COPY test/test_inputs/test1_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+file(COPY test/test_inputs/test2_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+file(COPY test/test_inputs/test3_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+file(COPY test/test_inputs/test4_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 

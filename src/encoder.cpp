@@ -28,16 +28,16 @@ void Encoder::compressFile(const std::string &file_to_compress, const std::strin
     // Read the file into memory.
     std::stringstream buffer;
     buffer << input_stream.rdbuf();
-    const std::string file_text = buffer.str();
+    const std::string unencoded_text = buffer.str();
     input_stream.close();
 
     // Build the Huffman tree and create the encoding table.
-    std::unordered_map<char, uint64_t> character_frequencies = countCharacterFrequencies(thread_pool, file_text);
+    std::unordered_map<char, uint64_t> character_frequencies = countCharacterFrequencies(thread_pool, unencoded_text);
     std::unique_ptr<Node> huffman_tree_root = constructHuffmanTree(character_frequencies);
     std::unordered_map<char, std::string> huffman_table = constructHuffmanTable(std::move(huffman_tree_root));
 
     // Encode the text and get the bytes to write to the encoded file.
-    auto [bit_string, block_offsets] = toBitString(thread_pool, huffman_table, file_text);
+    auto [bit_string, block_offsets] = toBitString(thread_pool, huffman_table, unencoded_text);
     const uint8_t padding = padBitString(bit_string);
     const std::vector<unsigned char> bytes = toBytes(thread_pool, bit_string);
 

@@ -77,6 +77,6 @@ private:
 
     // The size of the string that will be submitted to the thread pool for conversion to a bit string.
     // Note that using small numbers will result in poor performance.
-    static constexpr uint32_t bit_string_block_size = 500;
+    static constexpr uint32_t bit_string_block_size = 1000;
 };
 #endif // CONCURRENT_HUFFMAN_DECODER_H

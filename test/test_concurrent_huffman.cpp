@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 #include "concurrent_huffman.h"
 
 // Tests encoding / decoding a file that only consists of a single, repeated, alphabetical character.
@@ -27,8 +28,8 @@ TEST(Huffman, EncodingAndDecodingTest1)
     ASSERT_EQ(expected_decoded_text, actual_decoded_text);
 
     // Clean up the files created during the tests.
-    std::remove("test1_encoded.txt");
-    std::remove("test1_decoded.txt");
+    std::filesystem::remove("test1_encoded.txt");
+    std::filesystem::remove("test1_decoded.txt");
 }
 
 // Tests encoding / decoding a file with alphabetical, numeric, and special characters.
@@ -55,8 +56,8 @@ TEST(Huffman, EncodingAndDecodingTest2)
     ASSERT_EQ(expected_decoded_text, actual_decoded_text);
 
     // Clean up the files created during the tests.
-    std::remove("test2_encoded.txt");
-    std::remove("test2_decoded.txt");
+    std::filesystem::remove("test2_encoded.txt");
+    std::filesystem::remove("test2_decoded.txt");
 }
 
 // Tests encoding / decoding a file that consists of various ASCII characters.
@@ -83,8 +84,8 @@ TEST(Huffman, EncodingAndDecodingTest3)
     ASSERT_EQ(expected_decoded_text, actual_decoded_text);
 
     // Clean up the files created during the tests.
-    std::remove("test3_encoded.txt");
-    std::remove("test3_decoded.txt");
+    std::filesystem::remove("test3_encoded.txt");
+    std::filesystem::remove("test3_decoded.txt");
 }
 
 // Tests encoding / decoding a larger file that will require multiple threads.
@@ -111,6 +112,6 @@ TEST(Huffman, EncodingAndDecodingTest4)
     ASSERT_EQ(expected_decoded_text, actual_decoded_text);
 
     // Clean up the files created during the tests.
-    std::remove("test4_encoded.txt");
-    std::remove("test4_decoded.txt");
+    std::filesystem::remove("test4_encoded.txt");
+    std::filesystem::remove("test4_decoded.txt");
 }

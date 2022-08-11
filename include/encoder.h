@@ -103,10 +103,12 @@ private:
 
     // The size of the string that that will be submitted to the thread pool for character counting.
     // Note that using small numbers will result in poor performance.
-    static constexpr uint32_t count_character_block_size = 500;
+    static constexpr uint32_t count_character_block_size = 1000;
     // The size of the bit string that will be submitted to the thread pool for conversion to bytes.
     // Must be divisible by eight since the string is being converted to bytes.
     // As before, using small numbers will result in poor performance.
-    static constexpr uint32_t to_bytes_block_size = 400;
+    static constexpr uint32_t to_bytes_block_size = 800;
+    // The number of threads that the thread pool will use.
+    inline static uint32_t num_threads = std::thread::hardware_concurrency() - 1;
 };
 #endif // CONCURRENT_HUFFMAN_ENCODER_H
