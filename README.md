@@ -15,8 +15,7 @@ To build and test the project, run the following commands:
   make test
 ```
 # Usage
-Using this file compression tool is simple. To encode a file, provide the name of the file you would like to compress and a name for the compressed file
-that will be created.
+Using this file compression tool is simple. To compress a file, provide the name of the file you would like to compress and a name for the compressed file that will be created.
 ```cpp
   #include "concurrent_huffman.h"
   
@@ -31,3 +30,21 @@ that will be created.
   }
 
 ```
+Decompressing a file is similar. To decompress a file, provide a name of the file that you would like to decompress and a name for the decompressed file
+that will be created.
+```cpp
+  #include "concurrent_huffman.h"
+  
+  int main()
+  {
+    // The file that is going to be compressed.
+    std::string file_to_decompress = "my_compressed_file.txt";
+    // The decompressed file created from the compressed file.
+    std::string compressed_file = "my_decompressed_file.txt";
+    // Decompress the file.
+    ConcurrentHuffman::decompressFile(file_to_decompress, decompressed_file);
+  }
+
+```
+Note that, in order to decompress a file, the compressed file must have been compressed with this tool.
+
