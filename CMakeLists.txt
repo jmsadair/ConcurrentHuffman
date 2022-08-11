@@ -13,7 +13,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR})
 set(HUFFMAN_INSTALL_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 set(HUFFMAN_INSTALL_BIN_DIR ${CMAKE_INSTALL_BINDIR})
-set(HUFFMAN_TEST_INPUT_PATH ${PROJECT_SOURCE_DIR}/test/test_inputs)
 
 # ------------------------------------------------------------------------------
 # Includes
@@ -143,13 +142,13 @@ file(COPY benchmark/bench_uncompressed.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin
 include(CTest)
 include(GoogleTest)
 file(GLOB_RECURSE TEST_SOURCE_FILES "test/*.cpp")
-add_executable(concurrent_huffman_tests ${TEST_SOURCE_FILES})
-target_link_libraries(concurrent_huffman_tests concurrent_huffman_lib)
-target_link_libraries(concurrent_huffman_tests gtest_main)
-add_test(NAME concurrent_huffman_tests COMMAND concurrent_huffman_tests)
-install(TARGETS concurrent_huffman_tests DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/tests)
 file(COPY test/test_inputs/test1_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 file(COPY test/test_inputs/test2_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 file(COPY test/test_inputs/test3_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
 file(COPY test/test_inputs/test4_input.txt DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-
+add_executable(concurrent_huffman_tests ${TEST_SOURCE_FILES})
+target_link_libraries(concurrent_huffman_tests concurrent_huffman_lib)
+target_link_libraries(concurrent_huffman_tests gtest_main)
+add_test(NAME concurrent_huffman_tests COMMAND concurrent_huffman_tests
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test/test_inputs)
+install(TARGETS concurrent_huffman_tests DESTINATION ${HUFFMAN_INSTALL_BIN_DIR}/tests)
