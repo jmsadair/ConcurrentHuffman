@@ -18,6 +18,7 @@ To build and test the project, run the following commands:
 ## Usage
 Using this file compression tool is simple. To compress a file, provide the name of the file you would like to compress and a name for the compressed file that will be created.
 ```cpp
+  #include <string>
   #include "concurrent_huffman.h"
   
   int main()
@@ -34,6 +35,7 @@ Using this file compression tool is simple. To compress a file, provide the name
 Decompressing a file is similar. To decompress a file, provide a name of the file that you would like to decompress and a name for the decompressed file
 that will be created.
 ```cpp
+  #include <string>
   #include "concurrent_huffman.h"
   
   int main()
