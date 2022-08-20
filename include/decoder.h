@@ -23,8 +23,9 @@ public:
      * @param file_to_decompress the name of the file that will be decompressed, require that the file
      *                           exists and is compressed.
      * @param decompressed_file the name of the decompressed file that will be created.
+     * @param num_threads the number of threads that will be using during file decompression, require that num_threads is positive.
      */
-    static void decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file);
+    static void decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file, uint32_t num_threads);
 
 private:
     /**
@@ -78,6 +79,5 @@ private:
     // The size of the string that will be submitted to the thread pool for conversion to a bit string.
     // Note that using small numbers will result in poor performance.
     static constexpr uint32_t bit_string_block_size = 1000;
-    static const uint32_t num_threads = 11;
 };
 #endif // CONCURRENT_HUFFMAN_DECODER_H

@@ -15,8 +15,9 @@ public:
      * @param file_to_compress the name of the file that will be compressed, require that the file
      *                         exists and is not already compressed.
      * @param compressed_file the name of the compressed file that will be created.
+     * @param num_threads the number of threads that will be used during file compression, require that num_threads is positive.
      */
-    static void compressFile(const std::string &file_to_compress, const std::string &compressed_file);
+    static void compressFile(const std::string &file_to_compress, const std::string &compressed_file, uint32_t num_threads);
 
 private:
     /**
@@ -110,7 +111,5 @@ private:
     // Must be divisible by eight since the string is being converted to bytes.
     // As before, using small numbers will result in poor performance.
     static constexpr uint32_t to_bytes_block_size = 800;
-    // The number of threads that the thread pool will use.
-    inline static uint32_t num_threads = 11;
 };
 #endif // CONCURRENT_HUFFMAN_ENCODER_H

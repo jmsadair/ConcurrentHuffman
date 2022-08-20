@@ -5,7 +5,7 @@
 #include <bitset>
 #include "decoder.h"
 
-void Decoder::decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file)
+void Decoder::decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file, uint32_t num_threads)
 {
     // Start up the thread pool for decoding task submission.
     Concurrent::ThreadPool thread_pool(num_threads);

@@ -6,7 +6,7 @@
 #include <bitset>
 #include "encoder.h"
 
-void Encoder::compressFile(const std::string &file_to_compress, const std::string &compressed_file)
+void Encoder::compressFile(const std::string &file_to_compress, const std::string &compressed_file, uint32_t num_threads)
 {
     // Start up the thread pool for encoding task submission.
     Concurrent::ThreadPool thread_pool(num_threads);
