@@ -15,7 +15,8 @@ struct ConcurrentHuffman
      * @param compressed_file the name of the compressed file that will be created.
      * @param num_threads the number of threads to use during file compression, require num_threads is positive.
      */
-    static void compressFile(const std::string &file_to_compress, const std::string &compressed_file, uint32_t num_threads = std::thread::hardware_concurrency() - 1);
+    static void compressFile(const std::string &file_to_compress, const std::string &compressed_file,
+        uint32_t num_threads = std::thread::hardware_concurrency() - 1);
 
     /**
      * Decompresses a file.
@@ -25,6 +26,7 @@ struct ConcurrentHuffman
      * @param decompressed_file the name of the decompressed file that will be created.
      * @param num_threads the number of threads to use during file decompression, require that num_threads is positive.
      */
-    static void decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file, uint32_t num_threads = std::thread::hardware_concurrency() - 1 );
+    static void decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file,
+        uint32_t num_threads = std::thread::hardware_concurrency() - 1);
 };
 #endif // CONCURRENT_HUFFMAN_CONCURRENT_HUFFMAN_H
