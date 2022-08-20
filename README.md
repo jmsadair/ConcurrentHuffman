@@ -53,9 +53,13 @@ Note that, in order to decompress a file, the compressed file must have been com
 ## Benchmarks
 The compression process was benchmarked using a 1 MB file consisting of various numeric characters. The decompression process was benchmarked using a 470 kB file (the compressed 1 MB file). All benchmarks were ran on an Intel Core i7-8700 processor, which supports up to 12 threads.
 ```
-  -----------------------------------------------------------
-  Benchmark                 Time             CPU   Iterations
-  -----------------------------------------------------------
-  BM_Compression         16.9 ms         15.9 ms           44
-  BM_Decompression       17.9 ms         6.60 ms          106
+  --------------------------------------------------------------------------------
+Benchmark                                      Time             CPU   Iterations
+--------------------------------------------------------------------------------
+BM_Compression/Number of threads:1          62.0 ms         29.9 ms           23
+BM_Compression/Number of threads:5          16.2 ms         14.4 ms           49
+BM_Compression/Number of threads:10         18.9 ms         18.6 ms           37
+BM_Decompression/Number of threads:1         119 ms         11.3 ms           61
+BM_Decompression/Number of threads:5        25.9 ms         6.61 ms          106
+BM_Decompression/Number of threads:10       19.6 ms         7.80 ms           90
 ```
