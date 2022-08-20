@@ -9,7 +9,7 @@
 void Encoder::compressFile(const std::string &file_to_compress, const std::string &compressed_file)
 {
     // Start up the thread pool for encoding task submission.
-    Concurrent::ThreadPool thread_pool;
+    Concurrent::ThreadPool thread_pool(num_threads);
 
     // Try to open the file that will be encoded.
     std::ifstream input_stream;
@@ -67,7 +67,7 @@ std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent
     std::vector<std::future<std::unordered_map<char, uint64_t>>> futures(num_blocks);
 
     // Submit blocks to thread pool for counting.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
         std::advance(block_end, count_character_block_size);
@@ -78,7 +78,7 @@ std::unordered_map<char, uint64_t> Encoder::countCharacterFrequencies(Concurrent
     character_frequencies = std::move(countCharacterFrequencies(block_start, block_end));
 
     // Sum up all the counts from the blocks into a single unordered map.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         std::unordered_map<char, uint64_t> block_counts = futures[i].get();
         for (const auto &[character, count] : block_counts)
@@ -187,7 +187,7 @@ std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(
     std::vector<std::future<std::string>> futures(num_blocks);
 
     // Submit blocks to thread pool for encoding.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
         std::advance(block_end, block_size);
@@ -199,7 +199,7 @@ std::pair<std::string, std::vector<uint32_t>> Encoder::toBitString(
     const std::string last_encoded_block = toBitString(encoding_table, block_start, block_end);
 
     // Combine the text that each thread encoded into a single string.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         const std::string encoded_block = futures[i].get();
         block_offsets.push_back(encoded_block.length());
@@ -230,7 +230,7 @@ std::vector<unsigned char> Encoder::toBytes(Concurrent::ThreadPool &pool, const 
     std::vector<std::future<std::vector<unsigned char>>> futures(num_blocks);
 
     // Submit blocks to thread pool for conversion to bytes.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
         std::advance(block_end, to_bytes_block_size);
@@ -241,7 +241,7 @@ std::vector<unsigned char> Encoder::toBytes(Concurrent::ThreadPool &pool, const 
     const std::vector<unsigned char> last_block = toBytes(block_start, block_end);
 
     // Combine the bytes from each block into a single vector.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         const std::vector<unsigned char> block_bytes = futures[i].get();
         bytes.insert(bytes.end(), block_bytes.begin(), block_bytes.end());

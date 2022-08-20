@@ -8,7 +8,7 @@
 void Decoder::decompressFile(const std::string &file_to_decompress, const std::string &decompressed_file)
 {
     // Start up the thread pool for decoding task submission.
-    Concurrent::ThreadPool thread_pool;
+    Concurrent::ThreadPool thread_pool(num_threads);
 
     // Try to open the encoded file.
     std::ifstream input_stream;
@@ -77,7 +77,7 @@ std::string Decoder::decodeBitString(Concurrent::ThreadPool &pool, const HeaderD
     std::vector<std::future<std::string>> futures(num_blocks);
 
     // Submit each block of the encoded string to the thread pool for decoding.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
         std::advance(block_end, header_data.block_offsets[i]);
@@ -86,7 +86,7 @@ std::string Decoder::decodeBitString(Concurrent::ThreadPool &pool, const HeaderD
         });
         block_start = block_end;
     }
-    auto block_end = bit_string.end();
+    const auto block_end = bit_string.end();
     const std::string last_block = decodeBitString(header_data.decoding_table, block_start, block_end);
 
     // Combine all the decoded text into a single string.
@@ -137,7 +137,7 @@ std::string Decoder::toBitString(Concurrent::ThreadPool &pool, const std::string
     std::vector<std::future<std::string>> futures(num_blocks);
 
     // Submit blocks to thread pool for conversion to bit string.
-    for (uint32_t i = 0; i < num_blocks; ++i)
+    for (auto i = 0; i < num_blocks; ++i)
     {
         auto block_end = block_start;
         std::advance(block_end, block_size);

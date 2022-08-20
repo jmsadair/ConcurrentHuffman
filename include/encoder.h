@@ -111,6 +111,6 @@ private:
     // As before, using small numbers will result in poor performance.
     static constexpr uint32_t to_bytes_block_size = 800;
     // The number of threads that the thread pool will use.
-    inline static uint32_t num_threads = std::thread::hardware_concurrency() - 1;
+    inline static uint32_t num_threads = 11;
 };
 #endif // CONCURRENT_HUFFMAN_ENCODER_H
